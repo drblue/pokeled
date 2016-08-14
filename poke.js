@@ -40,11 +40,11 @@ var login = new pogobuf.PTCLogin(),
 var led = {
 	stick: null,
 	isConnected: function isConnected() {
-		if (!stick) {
+		if (!led.stick) {
 			// try finding the blinkstick again if wasn"t connected at first
 			led.stick = blinkstick.findFirst();
 		}
-		return (typeof stick !== "undefined");
+		return (typeof led.stick !== "undefined");
 	},
 	blinker: function(team) {
 		if (this.isConnected()) {
@@ -64,7 +64,7 @@ var led = {
 					}, 1500);
 				},
 				function(done) {
-					stick.setColor(color, done);
+					led.stick.setColor(color, done);
 				},
 			], function(err, result) {
 				if (err) {
