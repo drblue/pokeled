@@ -4,23 +4,23 @@ Quick hack connecting a specific Pokemon Go-gym's owning team with a [Blinkstick
 
 ## Installation
 
-Clone the repo, run `npm install`, copy `config.example.js` to `config.js` and enter your [Pokemon Trainer Club (PTC)](https://club.pokemon.com/us/pokemon-trainer-club/sign-up/) account credentials *(use a dummy-account, not the one you're actively playing with!)*.
+Clone the repo, run `npm install`, copy `config.example.js` to `config.js` and enter your [Pokemon Trainer Club (PTC)](https://club.pokemon.com/us/pokemon-trainer-club/sign-up/) account credentials *(use a dummy-account, not the one you're actively playing with!)* + gps coordinates (look up using node-geocoder or google maps), followed by the id + coordinates for the gym you want to query/watch.
 
 ## Usage
 
-Run `poke.js` with whatever node-runner you like (just plain old `node`, perhaps `nodemon` or `forever`, or why not the awesome `pm2`). A sample `ecosystem.json` for `pm2` is included as I use it to deploy to my Raspberry Pi v1 which has the Blinkstick connected to it in my bedroom window.
+Run `poke.js` with whatever node-runner you like (just plain old `node`, perhaps `nodemon` or `forever`, or why not the awesome `pm2`).
 
 ## Contributing
 
 1. Fork it!
-2. Create your feature branch: `git checkout -b my-new-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin my-new-feature`
+2. Create your feature branch: `git checkout -b my-new-awesome-feature`
+3. Commit your changes: `git commit -am 'Added some awesome feature'`
+4. Push to the branch: `git push origin my-new-awesome-feature`
 5. Submit a pull request :D
 
 ## History
 
-TODO: Write history
+TODO: Write history.
 
 ## Credits
 
