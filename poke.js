@@ -13,6 +13,7 @@ try {
 	nodeGeocoder = require("node-geocoder"),
 	log = require("./log"),
 	blinkstick = require("blinkstick"),
+	colors = require('colors'),
 	Redis = require("ioredis"),
 	os = require("os"),
 	waterfall = require("async-waterfall");
@@ -21,11 +22,11 @@ try {
 	process.exit(1);
 }
 
-log("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
-log("*                                                                     *");
-log("*                        H e l l o   t h e r e                        *");
-log("*                                                                     *");
-log("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *");
+log("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *".blue);
+log("*                                                                     *".blue);
+log("*                        H e l l o   t h e r e                        *".blue);
+log("*                                                                     *".blue);
+log("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *".blue);
 
 var login = new pogobuf.PTCLogin(),
 	client = new pogobuf.Client(),
@@ -33,6 +34,17 @@ var login = new pogobuf.PTCLogin(),
 	lat,
 	lng,
 	intervalId;
+
+function team_name(team) {
+	var name = pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.TeamColor, team);
+	switch (team) {
+		case 0: return name.black.bgWhite; break;
+		case 1: return name.bgBlue; break;
+		case 2: return name.bgRed; break;
+		case 3: return name.black.bgYellow; break;
+		default: return name; break;
+	}
+}
 
 /**
  * Blinkstick
@@ -90,25 +102,26 @@ var getGymDetails = function() {
 		// Display gym information
 		var fortData = gym.gym_state.fort_data,
 			memberships = gym.gym_state.memberships,
-			out = [];
+			out = [],
+			verbose = [];
 
 		out.push("Gym: " + gym.name);
 		out.push(
 			"Owner: " + 
-			pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.TeamColor, fortData.owned_by_team) + 
-			((fortData.is_in_battle) ? " [IN BATTLE]" : "")
+			team_name(fortData.owned_by_team) + 
+			" " + ((fortData.is_in_battle) ? "[IN BATTLE]".bgRed : "\t")
 		);
+		out.push("Points: " + fortData.gym_points);
+		log(out.join("\t"));
 
 		if (config.watched_gym.verbose) {
-			out.push("Points: " + fortData.gym_points);
 			if (memberships && memberships.length) {
 				var highest = memberships[memberships.length - 1];
-				out.push("Highest Pokémon: " + pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, highest.pokemon_data.pokemon_id) + ", " + highest.pokemon_data.cp + " CP");
-				out.push("Trainer: " + highest.trainer_public_profile.name + ", level " + highest.trainer_public_profile.level);
+				verbose.push("Highest Pokémon: " + pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.PokemonId, highest.pokemon_data.pokemon_id) + ", " + highest.pokemon_data.cp + " CP");
+				verbose.push("Trainer: " + highest.trainer_public_profile.name + ", level " + highest.trainer_public_profile.level);
+				log(verbose.join("\t"));
 			}
 		}
-
-		log(out.join("\t"));
 
 		if (fortData.owned_by_team !== config.watched_gym.owned_by_team) {
 			// victory!
@@ -129,11 +142,11 @@ var getGymDetails = function() {
 };
 
 var doLogin = function() {
-	log("Logging in..");
+	log("Logging in..".green);
 	login.login(config.username, config.password)
 		.then(token => {
 			// Initialize the client
-			log("Setting auth & position..");
+			log("Setting auth & position..".green);
 			client.setAuthInfo(config.provider, token);
 			client.setPosition(config.location.lat, config.location.lng);
 
@@ -143,7 +156,7 @@ var doLogin = function() {
 
 		.then(() => {
 
-			log("Successfully logged in");
+			log("Successfully logged in".green);
 			console.log();
 			
 			getGymDetails();
@@ -163,7 +176,7 @@ doLogin();
  * do graceful shutdown when told to
  */
 process.on("SIGINT", function() {
-	log("*** Received request to stop poky ***");
+	log("*** Received request to stop poky ***".red);
 
 	clearInterval(intervalId);
 
