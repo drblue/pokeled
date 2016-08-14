@@ -29,7 +29,7 @@
    * http://pm2.keymetrics.io/docs/usage/deployment/
    */
   deploy : {
-    poke-pi : {
+    pi : {
       user : "pi",
       host : "192.168.1.94",
       ref  : "origin/master",
