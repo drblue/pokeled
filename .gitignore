@@ -2,5 +2,4 @@
 *.sublime-workspace
 config.json
 node_modules
-ecosystem.json
 deploy
