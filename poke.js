@@ -42,7 +42,7 @@ var led = {
 	isConnected: function isConnected() {
 		if (!stick) {
 			// try finding the blinkstick again if wasn"t connected at first
-			var stick = blinkstick.findFirst();
+			led.stick = blinkstick.findFirst();
 		}
 		return (typeof stick !== "undefined");
 	},
