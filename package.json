@@ -1,0 +1,32 @@
+{
+  "name": "poke",
+  "version": "1.0.0",
+  "description": "Quick hack connecting a specific Pokemon Go-gym's owning team with a Blinkstick (USB-connected multi-color LED-strip)",
+  "main": "poke.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Johan Nordström <johan@digitalvillage.se>",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/dr_blue/poke.git"
+  },
+  "dependencies": {
+    "async-waterfall": "^0.1.5",
+    "blinkstick": "^1.1.3",
+    "bluebird": "^3.4.1",
+    "bluebird-retry": "^0.8.0",
+    "colors": "^1.1.2",
+    "gpsoauthnode": "0.0.5",
+    "ioredis": "^2.3.0",
+    "long": "^3.2.0",
+    "node-geocoder": "^3.13.1",
+    "node-pogo-protos": "^1.2.0",
+    "node-pogo-signature": "^2.0.0",
+    "pogobuf": "^1.5.0",
+    "pokemon-go-node-api": "^1.4.0",
+    "request": "^2.74.0",
+    "s2-geometry": "^1.2.7"
+  }
+}
