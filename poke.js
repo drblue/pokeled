@@ -144,26 +144,28 @@ var getGymDetails = function() {
 var doLogin = function() {
 	log("Logging in..".green);
 	login.login(config.username, config.password)
-		.then(token => {
-			// Initialize the client
-			log("Setting auth & position..".green);
-			client.setAuthInfo(config.provider, token);
-			client.setPosition(config.location.lat, config.location.lng);
+	.then(token => {
+		// Initialize the client
+		log("Setting auth & position..".green);
+		client.setAuthInfo(config.provider, token);
+		client.setPosition(config.location.lat, config.location.lng);
 
-			// Perform the initial request
-			return client.init();
-		})
+		// Perform the initial request
+		return client.init();
+	})
+	.then(() => {
 
-		.then(() => {
+		log("Successfully logged in".green);
+		console.log();
+		
+		getGymDetails();
+		intervalId = setInterval(getGymDetails, config.query_interval);
 
-			log("Successfully logged in".green);
-			console.log();
-			
-			getGymDetails();
-			intervalId = setInterval(getGymDetails, config.query_interval);
-
-		})
-
+	})
+	.catch((err) => {
+		console.log("ERROR caught during doLogin(): ", err.message);
+		process.exit(1);
+	});
 }
 
 // start up blinkstick so we know when project is deployed to the raspberry pi
