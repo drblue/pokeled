@@ -14,7 +14,10 @@
 		"owned_by_team": 0,
 		"verbose": true
 	},
-	"query_interval": 30000,
+	"query_interval": {
+		"min": 30,
+		"max": 180
+	},
 	"team_colors": {
 		"0": "white",
 		"1": "blue",

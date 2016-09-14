@@ -133,6 +133,11 @@ var getGymDetails = function() {
 			led.blinker(fortData.owned_by_team);
 			config.watched_gym.owned_by_team = fortData.owned_by_team;
 		}
+
+		var query_interval = getRandomQueryInterval();
+		log("Querying again in " + query_interval/1000 + " seconds");
+		intervalId = setTimeout(getGymDetails, query_interval);
+
 	})
 	.catch((err) => {
 		console.log("ERROR: ", err.message);
@@ -140,6 +145,16 @@ var getGymDetails = function() {
 		doLogin();
 	});
 };
+
+function getRandomIntInclusive(min, max) {
+	min = Math.ceil(min);
+	max = Math.floor(max);
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomQueryInterval() {
+	return getRandomIntInclusive(config.query_interval.min, config.query_interval.max) * 1000;
+}
 
 var doLogin = function() {
 	log("Logging in..".green);
@@ -159,11 +174,11 @@ var doLogin = function() {
 		console.log();
 		
 		getGymDetails();
-		intervalId = setInterval(getGymDetails, config.query_interval);
 
 	})
 	.catch((err) => {
 		console.log("ERROR caught during doLogin(): ", err.message);
+		console.log(err);
 		process.exit(1);
 	});
 }
@@ -180,7 +195,7 @@ doLogin();
 process.on("SIGINT", function() {
 	log("*** Received request to stop poky ***".red);
 
-	clearInterval(intervalId);
+	clearTimeout(intervalId);
 
 	if (led.stick) {
 		led.stick.setColor(0, 0, 0, function(){
