@@ -29,12 +29,12 @@
    * http://pm2.keymetrics.io/docs/usage/deployment/
    */
   deploy : {
-    pi : {
-      user : "pi",
-      host : "192.168.1.94",
+    pitwo : {
+      user : "jn",
+      host : "192.168.1.115",
       ref  : "origin/master",
       repo : "git@github.com:drblue/pokeled.git",
-      path : "/home/pi/poke",
+      path : "/home/jn/poke",
       "post-deploy" : "pm2 startOrRestart ecosystem.json --env production"
     },
     // dev : {
