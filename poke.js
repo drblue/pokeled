@@ -13,7 +13,8 @@ try {
 	nodeGeocoder = require("node-geocoder"),
 	log = require("./log"),
 	blinkstick = require("blinkstick"),
-	colors = require('colors'),
+	chalk = require('chalk'),
+	moment = require('moment'),
 	Redis = require("ioredis"),
 	os = require("os"),
 	waterfall = require("async-waterfall");
@@ -22,11 +23,11 @@ try {
 	process.exit(1);
 }
 
-log("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *".blue);
-log("*                                                                     *".blue);
-log("*                        H e l l o   t h e r e                        *".blue);
-log("*                                                                     *".blue);
-log("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *".blue);
+log(chalk.blue("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"));
+log(chalk.blue("*                                                                     *"));
+log(chalk.blue("*                        H e l l o   t h e r e                        *"));
+log(chalk.blue("*                                                                     *"));
+log(chalk.blue("* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"));
 
 var login = new pogobuf.PTCLogin(),
 	client = new pogobuf.Client(),
@@ -38,10 +39,10 @@ var login = new pogobuf.PTCLogin(),
 function team_name(team) {
 	var name = pogobuf.Utils.getEnumKeyByValue(POGOProtos.Enums.TeamColor, team);
 	switch (team) {
-		case 0: return name.black.bgWhite; break;
-		case 1: return name.bgBlue; break;
-		case 2: return name.bgRed; break;
-		case 3: return name.black.bgYellow; break;
+		case 0: return chalk.black.bgWhite(name); break;
+		case 1: return chalk.bgBlue(name); break;
+		case 2: return chalk.bgRed(name); break;
+		case 3: return chalk.black.bgYellow(name); break;
 		default: return name; break;
 	}
 }
@@ -61,7 +62,7 @@ var led = {
 	blinker: function(team) {
 		if (this.isConnected()) {
 			var color = config.team_colors[team];
-			log("** BLINKER ** Pulsing to " + color);
+			log(chalk.yellow("[led] Pulsing to " + chalk[color](color)));
 
 			waterfall([
 				function(done) {
@@ -80,13 +81,20 @@ var led = {
 				},
 			], function(err, result) {
 				if (err) {
-					return log("** BLINKER ** Encountered error!", err);
+					return log(chalk.white.bgRed("[led] Encountered error!"), err);
 				}
-				return log("** BLINKER ** Done pulsing!");
+				return log(chalk.yellow("[led] Done pulsing"));
 			});
+		} else {
+			return log(chalk.yellow("[led] No led-strip found"));
+		}
+	},
+	turnOff: function() {
+		if (this.isConnected()) {
+			log("[led] Turning off");
+			led.stick.turnOff();
 		}
 	}
-
 };
 
 
@@ -102,14 +110,16 @@ var getGymDetails = function() {
 		// Display gym information
 		var fortData = gym.gym_state.fort_data,
 			memberships = gym.gym_state.memberships,
+			team_color = team_name(fortData.owned_by_team),
 			out = [],
 			verbose = [];
 
 		out.push("Gym: " + gym.name);
 		out.push(
 			"Owner: " + 
-			team_name(fortData.owned_by_team) + 
-			" " + ((fortData.is_in_battle) ? "[IN BATTLE]".bgRed : "\t")
+			// chalk[team_color.toLowerCase()](team_color) + 
+			team_color + 
+			" " + ((fortData.is_in_battle) ? chalk.bgRed("[IN BATTLE]") : "\t")
 		);
 		out.push("Points: " + fortData.gym_points);
 		log(out.join("\t"));
@@ -134,13 +144,12 @@ var getGymDetails = function() {
 			config.watched_gym.owned_by_team = fortData.owned_by_team;
 		}
 
-		var query_interval = getRandomQueryInterval();
-		log("Querying again in " + query_interval/1000 + " seconds");
+		var query_interval = getQueryInterval();
 		intervalId = setTimeout(getGymDetails, query_interval);
 
 	})
 	.catch((err) => {
-		console.log("ERROR: ", err.message);
+		log(chalk.white.bgRed("ERROR: ", err.message));
 		clearInterval(intervalId);
 		doLogin();
 	});
@@ -156,12 +165,32 @@ function getRandomQueryInterval() {
 	return getRandomIntInclusive(config.query_interval.min, config.query_interval.max) * 1000;
 }
 
+function getQueryInterval() {
+	var daytimeStartsAt = moment().set({'hour': 8, 'minute': 0, 'second': 0, 'millisecond': 0}),
+		daytimeEndsAt = moment().set({'hour': 16, 'minute': 0, 'second': 0, 'millisecond': 0}),
+		now = moment(),
+		nextQueryIn;
+
+	if (now.isBetween(daytimeStartsAt, daytimeEndsAt)) {
+		// postpone query until afternoon
+		nextQueryIn = daytimeEndsAt.diff(now);
+		// switch off blinkstick
+		led.turnOff();
+
+	} else {
+		nextQueryIn = getRandomQueryInterval();
+	}
+
+	log("Querying in " + nextQueryIn/1000 + " seconds (at " + now.add(nextQueryIn, 'milliseconds').format('HH:mm:ss') + ")");
+	return nextQueryIn;
+}
+
 var doLogin = function() {
-	log("Logging in..".green);
+	log(chalk.green("Logging in.."));
 	login.login(config.username, config.password)
 	.then(token => {
 		// Initialize the client
-		log("Setting auth & position..".green);
+		log(chalk.green("Setting auth & position.."));
 		client.setAuthInfo(config.provider, token);
 		client.setPosition(config.location.lat, config.location.lng);
 
@@ -170,15 +199,15 @@ var doLogin = function() {
 	})
 	.then(() => {
 
-		log("Successfully logged in".green);
+		log(chalk.green("Successfully logged in"));
 		console.log();
 		
 		getGymDetails();
 
 	})
 	.catch((err) => {
-		console.log("ERROR caught during doLogin(): ", err.message);
-		console.log(err);
+		log(chalk.white.bgRed("ERROR caught during doLogin(): ", err.message));
+		log(err);
 		process.exit(1);
 	});
 }
@@ -193,7 +222,7 @@ doLogin();
  * do graceful shutdown when told to
  */
 process.on("SIGINT", function() {
-	log("*** Received request to stop poky ***".red);
+	log(chalk.red("*** Received request to stop poky ***"));
 
 	clearTimeout(intervalId);
 
