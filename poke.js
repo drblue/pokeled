@@ -60,7 +60,10 @@ var led = {
 		return (typeof led.stick !== "undefined");
 	},
 	blinker: function(team) {
-		if (this.isConnected() && !isDaytime()) {
+		if (this.isConnected()) {
+			if (isDaytime()) {
+				return;
+			}
 			var color = config.team_colors[team];
 			log(chalk.yellow("[led] Pulsing to " + chalk[color](color)));
 
