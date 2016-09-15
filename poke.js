@@ -60,7 +60,7 @@ var led = {
 		return (typeof led.stick !== "undefined");
 	},
 	blinker: function(team) {
-		if (this.isConnected()) {
+		if (this.isConnected() && !isDaytime()) {
 			var color = config.team_colors[team];
 			log(chalk.yellow("[led] Pulsing to " + chalk[color](color)));
 
@@ -165,9 +165,21 @@ function getRandomQueryInterval() {
 	return getRandomIntInclusive(config.query_interval.min, config.query_interval.max) * 1000;
 }
 
+function getDaytimeStartsAt() {
+	return moment().set({'hour': 8, 'minute': 0, 'second': 0, 'millisecond': 0});	
+}
+
+function getDaytimeEndsAt() {
+	return moment().set({'hour': 16, 'minute': 0, 'second': 0, 'millisecond': 0});	
+}
+
+function isDaytime() {
+	return moment().isBetween(getDaytimeStartsAt(), getDaytimeEndsAt());
+}
+
 function getQueryInterval() {
-	var daytimeStartsAt = moment().set({'hour': 8, 'minute': 0, 'second': 0, 'millisecond': 0}),
-		daytimeEndsAt = moment().set({'hour': 16, 'minute': 0, 'second': 0, 'millisecond': 0}),
+	var daytimeStartsAt = getDaytimeStartsAt(),
+		daytimeEndsAt = getDaytimeEndsAt(),
 		now = moment(),
 		nextQueryIn;
 
